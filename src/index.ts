@@ -16,23 +16,18 @@ export default {
 } satisfies ExportedHandler<Env>
 
 async function handleCreateUser(request: Request, env: Env) {
-	let params = await request.formData();
+	const params = await request.formData();
 	if (params.get('username')) {
-		let username = params.get('username');
-		let theme = params.get('theme');
-		if (!theme) theme = 'default';
+		const username = params.get('username');
+		const theme = params.get('theme') || 'default';
 		if (typeof username === 'string' && username.match(/[\w\d]{3,15}/)) {
-			let profile = await env.DATA.get(`profile_${username}`);
-			if (!profile) {
-				let secret = nanoid(5).toLowerCase().replace(/[_-]/, 'z');
-				let profile = JSON.stringify({ secret: secret, theme: theme });
-				await env.DATA.put(`profile_${username}`, profile);
-				return new Response(
-					profile,
-					{ headers: { ...corsHeaders, 'content-type': 'application/json;charset=UTF-8' } }
-				);
+			const rawprofile = await env.DATA.get(`profile_${username}`);
+			if (!rawprofile) {
+				const secret = nanoid(5).toLowerCase().replace(/[_-]/, 'z');
+				const profile = { secret: secret, theme: theme };
+				await env.DATA.put(`profile_${username}`, JSON.stringify(profile));
+				return Response.json(profile, { headers: corsHeaders });
 			} else {
-				console.log(profile)
 				return new Response("This username is taken!", { status: 403, headers: corsHeaders });
 			}
 		} else {
@@ -106,7 +101,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 	} else if (scope) { // Leaderboard mode
 		let result: { [id: string]: any };
 
-		if (scope.indexOf('*') >= 0) {
+		if (scope.indexOf('*') >= 0) { // Bulk leaderboard fetching
 			const username = params.get('username');
 			if (username) {
 				let highscores = await env.DATA.list();
@@ -124,7 +119,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 			} else {
 				return new Response("username parameter missing!", { headers: corsHeaders, status: 400 });
 			}
-		} else {
+		} else { // Single leaderboard
 			result = JSON.parse(await env.DATA.get(scope) || '{}');
 		}
 
