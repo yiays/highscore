@@ -10,6 +10,12 @@ compatibility_flags = ["nodejs_compat"]
 [observability]
 enabled = true
 
+# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
+# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
+[[kv_namespaces]]
+binding = "DATA"
+id = "de38b4f547474603999ddd70958b97ed"
+
 # Automatically place your workloads in an optimal location to minimize latency.
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
 # rather than the end user may result in better performance.
@@ -70,12 +76,6 @@ enabled = true
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#hyperdrive
 # [[hyperdrive]]
 # binding = "MY_HYPERDRIVE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-# Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # Bind an mTLS certificate. Use to present a client certificate when communicating with another service.
