@@ -11,8 +11,7 @@ interface Entries {
   [id:string]: number|number[]
 }[]
 
-export function sortLeaderboard(rawdata:string, scope:string) {
-  let data = JSON.parse(rawdata) as Entries;
+export function sortLeaderboard(data:Entries, scope:string) {
   var entries = Object.keys(data).map((key) => {
     return [key, data[key]] as Entry<any>;
   });

@@ -49,18 +49,14 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 		let username = params.get('username');
 		if (username) {
 			username = username.toLowerCase();
-			const rawprofile = await env.DATA.get(`profile_${username}`);
-			let profile = JSON.parse(rawprofile || '');
+			const profile = await env.DATA.get<any>(`profile_${username}`, 'json');
 			if (profile) {
 				if (params.get('secret') == profile.secret) {
 					if (scope) { // Record high score
 						if (params.get('score')) {
 							let score = JSON.parse('{"value":' + params.get('score') + '}').value;
 
-							let load = await env.DATA.get(scope);
-							if (load == null) load = '{}'; // Create scope if not exist
-
-							let board = JSON.parse(load);
+							let board = await env.DATA.get<any>(scope, 'json') || {};
 							if (username in board && !params.get('force')) {
 								const sortmode = scope.split('_')[0] as sortModes;
 								let sorter = sorters[sortmode];
@@ -109,7 +105,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 				result = {};
 				for (var key of keys) {
 					if (key.startsWith(scope.slice(0, scope.indexOf('*')))) {
-						const data = await env.DATA.get(key) as string;
+						const data = await env.DATA.get<any>(key, 'json');
 						let entries = sortLeaderboard(data, key);
 						let topUsernames = entries.map((a) => a[0]);
 						if (topUsernames.indexOf(username) >= 0)
@@ -120,7 +116,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 				return new Response("username parameter missing!", { headers: corsHeaders, status: 400 });
 			}
 		} else { // Single leaderboard
-			result = JSON.parse(await env.DATA.get(scope) || '{}');
+			result = await env.DATA.get<any>(scope, 'json') || {};
 		}
 
 		return Response.json(result, { headers: corsHeaders });
